@@ -2,132 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Food List & Meal Builder — Mobile Optimized</title>
+<title>Food List & Meal Builder</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
-:root{
-  --bg:#ffffff; --muted:#6b7280; --border:#e6e9ee; --card:#f9fafb;
-  --accent:#2563eb; --accent-600:#1e40af; --danger:#ef4444;
-  --shadow:0 6px 18px rgba(32,33,36,0.06);
-}
-html,body{height:100%}
-body {
-  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-  margin: 10px;
-  color:#111827;
-  background:var(--bg);
-  max-width:1600px;
-}
-
-.grid { display:grid; grid-template-columns:1fr 720px; gap:20px; align-items:start; }
-.col-left, .col-right { display:flex; flex-direction:column; gap:20px; }
-.box{ border:1px solid var(--border); padding:14px; border-radius:12px; background:var(--card); box-shadow:var(--shadow); overflow:visible; }
-h1{margin:0 0 14px 0} h2{margin:0 0 8px 0}
-.flex { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-.column { display:flex; flex-direction:column; gap:8px; }
-.right { margin-left:auto; display:flex; gap:8px; align-items:center; }
-
-input[type="number"], input[type="text"], input[type="search"] {
-  padding:8px 10px; border:1px solid var(--border); border-radius:8px; outline:none;
-  min-width:100px; transition:box-shadow .12s, border-color .12s;
-}
-input:focus { border-color:var(--accent); box-shadow:0 4px 10px rgba(37,99,235,0.08); }
-
+body { font-family: Arial, sans-serif; margin: 10px; color:#111; background:#fff; max-width:1200px; }
+h1,h2{ margin:0 0 8px 0; }
+.grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.box{ border:1px solid #ddd; padding:12px; border-radius:10px; background:#f9f9f9; }
+.flex{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.column{ display:flex; flex-direction:column; gap:8px; }
+input[type=text], input[type=number], input[type=search]{ padding:6px 8px; border-radius:6px; border:1px solid #ccc; width:100%; box-sizing:border-box; }
+.btn{ padding:6px 10px; border:none; border-radius:6px; cursor:pointer; transition:0.1s; }
+.btn-primary{ background:#2563eb; color:#fff; }
+.btn-secondary{ background:#eee; color:#111; }
+.btn-danger{ background:#ef4444; color:#fff; }
+.btn-sm{ padding:4px 6px; font-size:0.85rem; }
 table{ width:100%; border-collapse:collapse; margin-top:8px; }
-th,td{ padding:8px 10px; border-bottom:1px solid #f1f5f9; text-align:left; vertical-align:middle; }
-th{ font-weight:600; color:#374151; font-size:0.95rem; }
-
-.btn{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px;
-  border:1px solid transparent; font-weight:600; cursor:pointer; transition:transform .06s, box-shadow .12s;
-  box-shadow:0 2px 8px rgba(16,24,40,0.04); background:linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0)); }
-.btn:active{ transform:translateY(1px) }
-.btn-primary{ color:#fff; background:linear-gradient(180deg,var(--accent),var(--accent-600));
-  box-shadow:0 8px 20px rgba(37,99,235,0.18) }
-.btn-secondary{ color:#0f172a; background:linear-gradient(180deg,#fff,#f5f7fb); border:1px solid #d1d5db }
-.btn-danger{ color:#fff; background:linear-gradient(180deg,var(--danger),#b91c1c) }
-.btn-sm{ padding:6px 8px; border-radius:8px; font-size:0.85rem }
-
-.controls{ display:flex; gap:8px; align-items:center; width:100% }
-.controls input[type="search"]{ flex:1; min-width:160px }
-
-.muted{ color:var(--muted); font-size:0.92rem }
-
-@media (max-width:1100px){ .grid{ grid-template-columns: 1fr; } .col-right { order: 99; } }
-.meal-grams::-webkit-outer-spin-button, .meal-grams::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.meal-grams { -moz-appearance: textfield; width:64px; padding:6px; border-radius:8px; border:1px solid #e6e9ee; text-align:center; font-size:0.95rem; }
-
-.table-wrap { overflow:auto; -webkit-overflow-scrolling: touch; }
-#mealTable { width:100%; border-collapse:collapse; table-layout:auto; }
-#mealTable thead th { white-space: normal; line-height:1.2; }
-#mealTable th:nth-child(1), #mealTable td:nth-child(1) { width:50%; min-width:240px; white-space:normal; word-break:break-word; }
-#mealTable th:nth-child(n+2), #mealTable td:nth-child(n+2) { text-align:right; white-space:nowrap; }
-#mealTable th:nth-child(2), #mealTable td:nth-child(2),
-#mealTable th:nth-child(3), #mealTable td:nth-child(3),
-#mealTable th:nth-child(4), #mealTable td:nth-child(4),
-#mealTable th:nth-child(5), #mealTable td:nth-child(5) { max-width:160px; }
-
-@media (max-width:640px){
-  #mealTable { table-layout:auto; }
-  #mealTable th:nth-child(1), #mealTable td:nth-child(1) { width:auto; min-width:auto; }
-  #mealTable th:nth-child(n+2), #mealTable td:nth-child(n+2) { text-align:left; white-space:normal; }
-  .meal-grams { width:48px; }
-}
+th,td{ border-bottom:1px solid #eee; padding:6px 8px; text-align:left; }
+th{ font-weight:600; }
+.meal-grams{ width:60px; text-align:center; }
+.muted{ color:#666; font-size:0.9rem; }
+@media (max-width:800px){ .grid{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
 <h1>Food List & Meal Builder</h1>
 <div class="grid">
-<div class="col-left">
+
+<div>
   <div class="box">
-    <h2>Add a Food</h2>
+    <h2>Add Foods</h2>
     <div class="flex">
-      <label>Name<br><input id="foodName" type="text" placeholder="e.g., Chicken breast" /></label>
-      <label>Serving (g)<br><input id="servingGrams" type="number" inputmode="numeric" pattern="\d*" /></label>
-      <label>Carbs (g)<br><input id="carbs" type="number" inputmode="numeric" pattern="\d*" /></label>
-      <label>Protein (g)<br><input id="protein" type="number" inputmode="numeric" pattern="\d*" /></label>
-      <div><br><button id="addFoodBtn" class="btn btn-primary">Add Food</button></div>
+      <label>Name<br><input id="foodName" type="text" placeholder="Food name" /></label>
+      <label>Serving (g)<br><input id="servingGrams" type="number" inputmode="numeric" /></label>
+      <label>Carbs (g)<br><input id="carbs" type="number" inputmode="numeric" /></label>
+      <label>Protein (g)<br><input id="protein" type="number" inputmode="numeric" /></label>
+      <div style="align-self:flex-end;"><button id="addFoodBtn" class="btn btn-primary">Add Food</button></div>
     </div>
-    <p class="muted" style="margin-top:8px;">Tip: You can add multiple foods and they are saved in your browser.</p>
   </div>
 
   <div class="box">
     <h2>Saved Foods</h2>
-    <div class="controls">
+    <div class="flex">
       <input id="searchFood" type="search" placeholder="Search foods..." />
-      <button id="clearAllFoods" class="btn btn-danger btn-sm">Clear All Foods</button>
+      <button id="clearAllFoods" class="btn btn-danger btn-sm">Clear All</button>
     </div>
     <table id="foodsTable">
-      <thead><tr><th>Name</th><th>Serving (g)</th><th>Carbs (g)</th><th>Protein (g)</th><th></th></tr></thead>
+      <thead><tr><th>Name</th><th>Serving (g)</th><th>Carbs (g)</th><th>Protein (g)</th><th>Actions</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
 </div>
 
-<div class="col-right">
+<div>
   <div class="box">
     <h2>Meal Builder</h2>
-    <p class="muted">Enter grams consumed for each item. Carbs and protein will update automatically.</p>
-    <div class="table-wrap">
-      <table id="mealTable">
-        <thead>
-          <tr>
-            <th>Food Name</th>
-            <th>Serving (g)</th>
-            <th>Consumed (g)</th>
-            <th>Carbs (g)</th>
-            <th>Protein (g)</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot>
-          <tr>
-            <td><strong>Totals</strong></td><td></td><td></td><td id="totalCarbs">0</td><td id="totalProtein">0</td><td></td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+    <table id="mealTable">
+      <thead>
+        <tr><th>Food</th><th>Serving (g)</th><th>Consumed (g)</th><th>Carbs (g)</th><th>Protein (g)</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td><strong>Totals</strong></td><td></td><td></td><td id="totalCarbs">0</td><td id="totalProtein">0</td><td></td>
+        </tr>
+      </tfoot>
+    </table>
+    <div class="flex" style="margin-top:10px; justify-content:space-between;">
       <button id="clearMeal" class="btn btn-secondary">Clear Meal</button>
       <button id="saveMealBtn" class="btn btn-primary">Save Meal</button>
     </div>
@@ -135,74 +76,67 @@ th{ font-weight:600; color:#374151; font-size:0.95rem; }
 
   <div class="box">
     <h2 style="display:inline-block;">Saved Meals</h2>
-    <button id="exportCsvBtn" class="btn btn-primary" style="margin-left:10px;vertical-align:middle">Export CSV</button>
-    <div class="table-wrap">
-      <table id="savedMealsTable">
-        <thead>
-          <tr>
-            <th>Date</th><th>Time</th><th>Foods</th><th>Total Carbs (g)</th><th>Total Protein (g)</th><th></th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <button id="exportCsvBtn" class="btn btn-primary btn-sm" style="margin-left:8px;">Export CSV</button>
+    <table id="savedMealsTable">
+      <thead>
+        <tr><th>Date</th><th>Time</th><th>Foods</th><th>Total Carbs (g)</th><th>Total Protein (g)</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 </div>
+
 </div>
 
 <script>
 // Storage and data
-const STORAGE_FOODS = 'foods', STORAGE_MEALS = 'meals';
-let foods = loadStorage(STORAGE_FOODS), meal = [], savedMeals = loadStorage(STORAGE_MEALS);
+const STORAGE_FOODS='foods', STORAGE_MEALS='meals';
+let foods=JSON.parse(localStorage.getItem(STORAGE_FOODS)||'[]');
+let meal=[], savedMeals=JSON.parse(localStorage.getItem(STORAGE_MEALS)||'[]');
 
-// Load and save
-function loadStorage(key){ try{ return JSON.parse(localStorage.getItem(key))||[]; } catch{ return []; } }
 function saveStorage(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
 
-// Render foods
 function renderFoods(filter=''){
-  const tbody = document.querySelector('#foodsTable tbody'); tbody.innerHTML='';
-  const q = filter.trim().toLowerCase();
+  const tbody=document.querySelector('#foodsTable tbody'); tbody.innerHTML='';
+  const q=filter.trim().toLowerCase();
   foods.forEach(f=>{
     if(q && !f.name.toLowerCase().includes(q)) return;
-    const tr = document.createElement('tr');
+    const tr=document.createElement('tr');
     tr.innerHTML=`<td>${f.name}</td><td>${f.servingGrams}</td><td>${f.carbs}</td><td>${f.protein}</td>
-    <td style="white-space:nowrap">
-    <button class="btn btn-primary btn-sm add-to-meal" data-id="${f.id}">Add</button>
-    <button class="btn btn-danger btn-sm delete-food" data-id="${f.id}">Delete</button></td>`;
+      <td>
+        <button class="btn btn-primary btn-sm add-to-meal" data-id="${f.id}">Add</button>
+        <button class="btn btn-danger btn-sm delete-food" data-id="${f.id}">Delete</button>
+      </td>`;
     tbody.appendChild(tr);
   });
 }
 
-// Render meal
-function computeNutrients(s,carbs,protein,consumed){ const ratio=consumed/s||0; return {carbs:carbs*ratio, protein:protein*ratio}; }
+function computeNutrients(s,c,p,consumed){ const ratio=consumed/s||0; return {carbs:c*ratio, protein:p*ratio}; }
+
 function renderMeal(){
   const tbody=document.querySelector('#mealTable tbody'); tbody.innerHTML='';
   let totalC=0, totalP=0;
   meal.forEach((f,idx)=>{
-    if(f.consumedGrams===undefined) f.consumedGrams=f.servingGrams;
-    const nut=computeNutrients(f.servingGrams,f.carbs,f.protein,f.consumedGrams);
+    const nut=computeNutrients(f.servingGrams,f.carbs,f.protein,f.consumedGrams||f.servingGrams);
     totalC+=nut.carbs; totalP+=nut.protein;
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${f.name}</td><td>${f.servingGrams}</td>
-      <td><input class="meal-grams" data-idx="${idx}" type="number" inputmode="numeric" pattern="\\d*" value="${f.consumedGrams}" /></td>
-      <td class="meal-carbs" data-idx="${idx}">${nut.carbs.toFixed(2)}</td>
-      <td class="meal-protein" data-idx="${idx}">${nut.protein.toFixed(2)}</td>
-      <td style="white-space:nowrap"><button data-idx="${idx}" class="btn btn-secondary btn-sm remove-from-meal">Remove</button></td>`;
+      <td><input class="meal-grams" data-idx="${idx}" type="number" inputmode="numeric" value="${f.consumedGrams||f.servingGrams}" /></td>
+      <td>${nut.carbs.toFixed(2)}</td><td>${nut.protein.toFixed(2)}</td>
+      <td><button data-idx="${idx}" class="btn btn-secondary btn-sm remove-from-meal">Remove</button></td>`;
     tbody.appendChild(tr);
   });
   document.getElementById('totalCarbs').textContent=totalC.toFixed(2);
   document.getElementById('totalProtein').textContent=totalP.toFixed(2);
 }
 
-// Render saved meals
 function renderSavedMeals(){
   const tbody=document.querySelector('#savedMealsTable tbody'); tbody.innerHTML='';
   savedMeals.forEach((m,idx)=>{
     const foodsStr=m.foods.map(f=>`${f.name}(${f.consumedGrams}g)`).join(', ');
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${m.date}</td><td>${m.time}</td><td>${foodsStr}</td><td>${m.totalCarbs.toFixed(2)}</td><td>${m.totalProtein.toFixed(2)}</td>
-    <td><button data-idx="${idx}" class="btn btn-danger btn-sm delete-meal">Delete</button></td>`;
+      <td><button data-idx="${idx}" class="btn btn-danger btn-sm delete-meal">Delete</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -210,13 +144,17 @@ function renderSavedMeals(){
 // Add food
 document.getElementById('addFoodBtn').onclick=function(){
   const name=document.getElementById('foodName').value.trim();
-  const s=Number(document.getElementById('servingGrams').value), c=Number(document.getElementById('carbs').value), p=Number(document.getElementById('protein').value);
+  const s=Number(document.getElementById('servingGrams').value);
+  const c=Number(document.getElementById('carbs').value);
+  const p=Number(document.getElementById('protein').value);
   if(!name||isNaN(s)||isNaN(c)||isNaN(p)){ alert('Enter valid values'); return; }
   const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   foods.push({id,name,servingGrams:s,carbs:c,protein:p});
   saveStorage(STORAGE_FOODS,foods);
-  renderFoods(); document.getElementById('foodName').value=''; document.getElementById('servingGrams').value=''; document.getElementById('carbs').value=''; document.getElementById('protein').value='';
+  renderFoods();
+  document.getElementById('foodName').value=''; document.getElementById('servingGrams').value=''; document.getElementById('carbs').value=''; document.getElementById('protein').value='';
 };
+
 document.getElementById('searchFood').oninput=function(){ renderFoods(this.value); };
 document.getElementById('clearAllFoods').onclick=function(){ if(confirm('Delete all foods?')){ foods=[]; saveStorage(STORAGE_FOODS,foods); renderFoods(); } };
 
@@ -232,7 +170,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('focusin',function(e){ if(e.target.matches('.meal-grams')) e.target.value=''; });
 document.addEventListener('input',function(e){ if(!e.target.matches('.meal-grams')) return;
   const idx=Number(e.target.dataset.idx); if(!meal[idx]) return;
-  const val=Number(e.target.value)||0; meal[idx].consumedGrams=val; renderMeal();
+  meal[idx].consumedGrams=Number(e.target.value)||0; renderMeal();
 });
 
 // Clear meal
@@ -256,7 +194,8 @@ document.getElementById('exportCsvBtn').onclick=function(){
   const header=['Date','Time','Foods','Total Carbs (g)','Total Protein (g)'];
   const rows=savedMeals.map(m=>[m.date,m.time,`"${m.foods.map(f=>f.name+'('+f.consumedGrams+'g)').join(', ')}"`,m.totalCarbs.toFixed(2),m.totalProtein.toFixed(2)]);
   const csv=[header,...rows].map(r=>r.join(',')).join('\r\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob);
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download=`saved_meals_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
 };
 
