@@ -1,222 +1,156 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Food List & Meal Builder — Mobile Optimized</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8" />
+<title>Food List & Meal Builder</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <style>
-    :root{
-      --bg:#ffffff; --muted:#6b7280; --border:#e6e9ee; --card:#f9fafb;
-      --accent:#2563eb; --accent-600:#1e40af; --danger:#ef4444;
-      --shadow:0 6px 18px rgba(32,33,36,0.06);
-    }
+<style>
+:root{
+  --bg:#ffffff; --muted:#6b7280; --border:#e6e9ee; --card:#f9fafb;
+  --accent:#2563eb; --accent-600:#1e40af; --danger:#ef4444;
+  --shadow:0 6px 18px rgba(32,33,36,0.06);
+}
 
-    html,body{height:100%}
-    body{
-      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-      margin:20px;
-      background:var(--bg);
-      color:#111827;
-      max-width:1600px;
-    }
+body{
+  font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+  margin:20px;
+  background:var(--bg);
+  color:#111827;
+  max-width:1600px;
+}
 
-    h1,h2{margin:0 0 12px}
+h1,h2{margin:0 0 12px}
 
-    /* Layout */
-    .grid{
-      display:grid;
-      grid-template-columns:1fr 720px;
-      gap:20px;
-      align-items:start;
-    }
+.grid{
+  display:grid;
+  grid-template-columns:1fr 720px;
+  gap:20px;
+}
 
-    .col-left,.col-right{
-      display:flex;
-      flex-direction:column;
-      gap:20px;
-    }
+@media(max-width:1100px){
+  .grid{grid-template-columns:1fr}
+}
 
-    @media (max-width:1100px){
-      .grid{grid-template-columns:1fr}
-      .col-right{order:99}
-    }
+.box{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px;
+  box-shadow:var(--shadow);
+}
 
-    .box{
-      border:1px solid var(--border);
-      padding:14px;
-      border-radius:12px;
-      background:var(--card);
-      box-shadow:var(--shadow);
-    }
+.flex{display:flex;gap:12px;flex-wrap:wrap}
+.column{display:flex;flex-direction:column;gap:6px}
 
-    .flex{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .column{display:flex;flex-direction:column;gap:6px}
-    .right{margin-left:auto;display:flex;gap:8px}
+input,button{
+  padding:8px 10px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  font-size:1rem;
+}
 
-    input[type="text"],
-    input[type="number"],
-    input[type="search"]{
-      padding:8px 10px;
-      border-radius:8px;
-      border:1px solid var(--border);
-      outline:none;
-      min-width:100px;
-    }
+input:focus{border-color:var(--accent)}
 
-    input:focus{
-      border-color:var(--accent);
-      box-shadow:0 4px 10px rgba(37,99,235,.08);
-    }
+.btn{
+  cursor:pointer;
+  font-weight:600;
+}
 
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:8px;
-    }
+.btn-primary{
+  background:linear-gradient(180deg,var(--accent),var(--accent-600));
+  color:#fff;
+  border:none;
+}
 
-    th,td{
-      padding:8px 10px;
-      border-bottom:1px solid #f1f5f9;
-      text-align:left;
-      vertical-align:middle;
-    }
+.btn-secondary{
+  background:#fff;
+}
 
-    th{
-      font-weight:600;
-      color:#374151;
-      font-size:.95rem;
-    }
+.btn-danger{
+  background:linear-gradient(180deg,var(--danger),#b91c1c);
+  color:#fff;
+  border:none;
+}
 
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:8px 12px;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
-      border:1px solid transparent;
-      box-shadow:0 2px 8px rgba(0,0,0,.04);
-    }
+.btn-sm{font-size:.85rem;padding:6px 8px}
 
-    .btn-primary{
-      background:linear-gradient(180deg,var(--accent),var(--accent-600));
-      color:#fff;
-    }
+table{
+  width:100%;
+  border-collapse:collapse;
+}
 
-    .btn-secondary{
-      background:#fff;
-      border:1px solid #d1d5db;
-    }
+th,td{
+  padding:8px;
+  border-bottom:1px solid #eee;
+}
 
-    .btn-danger{
-      background:linear-gradient(180deg,var(--danger),#b91c1c);
-      color:#fff;
-    }
+.meal-grams{
+  width:80px;
+  text-align:center;
+}
 
-    .btn-sm{font-size:.85rem;padding:6px 8px}
+.table-wrap{overflow-x:auto}
 
-    .muted{color:var(--muted);font-size:.9rem}
+/* =========================
+   MOBILE MEAL BUILDER
+   ========================= */
+@media(max-width:640px){
 
-    /* Meal grams input */
-    .meal-grams{
-      width:84px;
-      text-align:center;
-      padding:6px;
-      border-radius:8px;
-      border:1px solid var(--border);
-    }
+  body{margin:12px}
 
-    .meal-grams::-webkit-inner-spin-button,
-    .meal-grams::-webkit-outer-spin-button{
-      -webkit-appearance:none;
-      margin:0;
-    }
+  #mealTable thead,
+  #mealTable tfoot{
+    display:none;
+  }
 
-    .table-wrap{
-      overflow-x:auto;
-      -webkit-overflow-scrolling:touch;
-    }
+  #mealTable,
+  #mealTable tbody,
+  #mealTable tr,
+  #mealTable td{
+    display:block;
+    width:100%;
+  }
 
-    /* =========================
-       MOBILE MEAL BUILDER
-       ========================= */
-    @media (max-width:640px){
+  #mealTable tr{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:12px;
+    box-shadow:var(--shadow);
+  }
 
-      body{margin:12px}
+  #mealTable td{
+    border:none;
+    padding:4px 0;
+  }
 
-      #mealTable thead,
-      #mealTable tfoot{
-        display:none;
-      }
+  #mealTable td::before{
+    content:attr(data-label);
+    display:block;
+    font-size:.75rem;
+    color:var(--muted);
+    margin-bottom:2px;
+  }
 
-      #mealTable,
-      #mealTable tbody,
-      #mealTable tr,
-      #mealTable td{
-        display:block;
-        width:100%;
-      }
+  .meal-grams{
+    width:100%;
+    padding:10px;
+  }
 
-      #mealTable tr{
-        background:#fff;
-        border:1px solid var(--border);
-        border-radius:12px;
-        padding:12px;
-        margin-bottom:12px;
-        box-shadow:var(--shadow);
-      }
-
-      #mealTable td{
-        padding:4px 0;
-        border:none;
-      }
-
-      #mealTable td::before{
-        content:attr(data-label);
-        display:block;
-        font-size:.75rem;
-        color:var(--muted);
-        margin-bottom:2px;
-      }
-
-      #mealTable td:first-child{
-        font-weight:700;
-        font-size:1rem;
-        margin-bottom:6px;
-      }
-
-      .meal-grams{
-        width:100%;
-        font-size:1rem;
-        padding:10px;
-      }
-
-      .remove-from-meal{
-        width:100%;
-        margin-top:8px;
-      }
-
-      .meal-totals-mobile{
-        position:sticky;
-        bottom:0;
-        background:#fff;
-        border-top:1px solid var(--border);
-        padding:10px;
-        margin-top:10px;
-        display:flex;
-        justify-content:space-between;
-        font-weight:700;
-        box-shadow:0 -6px 12px rgba(0,0,0,.06);
-      }
-
-      #clearMeal{
-        width:100%;
-        margin-top:10px;
-      }
-    }
-  </style>
+  .meal-totals-mobile{
+    position:sticky;
+    bottom:0;
+    background:#fff;
+    padding:10px;
+    border-top:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    font-weight:700;
+  }
+}
+</style>
 </head>
 
 <body>
@@ -225,84 +159,179 @@
 
 <div class="grid">
 
-  <!-- LEFT COLUMN -->
-  <div class="col-left">
+<!-- LEFT -->
+<div>
 
-    <div class="box">
-      <h2>Add a Food</h2>
-      <div class="flex">
-        <label class="column">Name
-          <input id="foodName" type="text">
-        </label>
-        <label class="column">Serving (g)
-          <input id="servingGrams" type="number">
-        </label>
-        <label class="column">Carbs (g)
-          <input id="carbs" type="number">
-        </label>
-        <label class="column">Protein (g)
-          <input id="protein" type="number">
-        </label>
-        <button id="addFoodBtn" class="btn btn-primary">Add Food</button>
-      </div>
-    </div>
+<div class="box">
+<h2>Add Food</h2>
+<div class="flex">
+  <label class="column">Name
+    <input id="foodName">
+  </label>
+  <label class="column">Serving (g)
+    <input id="servingGrams" type="number">
+  </label>
+  <label class="column">Carbs (g)
+    <input id="carbs" type="number">
+  </label>
+  <label class="column">Protein (g)
+    <input id="protein" type="number">
+  </label>
+  <button id="addFoodBtn" class="btn btn-primary">Add Food</button>
+</div>
+</div>
 
-    <div class="box">
-      <h2>Saved Foods</h2>
-      <input id="searchFood" type="search" placeholder="Search foods…">
-      <table id="foodsTable">
-        <thead>
-          <tr><th>Name</th><th>Serving</th><th>Carbs</th><th>Protein</th><th></th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+<div class="box">
+<h2>Saved Foods</h2>
+<table id="foodsTable">
+<thead>
+<tr><th>Name</th><th>Serving</th><th>Carbs</th><th>Protein</th><th></th></tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
 
-  </div>
+</div>
 
-  <!-- RIGHT COLUMN -->
-  <div class="col-right">
+<!-- RIGHT -->
+<div>
 
-    <div class="box">
-      <h2>Meal Builder</h2>
-      <p class="muted">Enter how many grams you ate.</p>
+<div class="box">
+<h2>Meal Builder</h2>
 
-      <div class="table-wrap">
-        <table id="mealTable">
-          <thead>
-            <tr>
-              <th>Food</th><th>Serving</th><th>Consumed</th>
-              <th>Carbs</th><th>Protein</th><th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot>
-            <tr>
-              <td><strong>Totals</strong></td>
-              <td></td><td></td>
-              <td id="totalCarbs">0</td>
-              <td id="totalProtein">0</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+<div class="table-wrap">
+<table id="mealTable">
+<thead>
+<tr>
+<th>Food</th><th>Serving</th><th>Consumed</th><th>Carbs</th><th>Protein</th><th></th>
+</tr>
+</thead>
+<tbody></tbody>
+<tfoot>
+<tr>
+<td><strong>Totals</strong></td>
+<td></td><td></td>
+<td id="totalCarbs">0</td>
+<td id="totalProtein">0</td>
+<td></td>
+</tr>
+</tfoot>
+</table>
+</div>
 
-      <div class="meal-totals-mobile">
-        <div>Carbs: <span id="totalCarbs">0</span> g</div>
-        <div>Protein: <span id="totalProtein">0</span> g</div>
-      </div>
+<div class="meal-totals-mobile">
+<div>Carbs: <span id="totalCarbs">0</span></div>
+<div>Protein: <span id="totalProtein">0</span></div>
+</div>
 
-      <button id="clearMeal" class="btn btn-secondary">Clear Meal</button>
-    </div>
+<button id="clearMeal" class="btn btn-secondary">Clear Meal</button>
 
-  </div>
+</div>
+</div>
 </div>
 
 <script>
-/* --- JS IS IDENTICAL TO YOUR ORIGINAL VERSION ---
-   (Unchanged for brevity here, but keep your existing script exactly as-is)
-*/
+const STORAGE_KEY="foods";
+let foods=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+let meal=[];
+
+const foodName=document.getElementById("foodName");
+const servingGrams=document.getElementById("servingGrams");
+const carbs=document.getElementById("carbs");
+const protein=document.getElementById("protein");
+const foodsBody=document.querySelector("#foodsTable tbody");
+const mealBody=document.querySelector("#mealTable tbody");
+const totalCarbsEl=document.getElementById("totalCarbs");
+const totalProteinEl=document.getElementById("totalProtein");
+
+function saveFoods(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(foods));
+}
+
+function renderFoods(){
+  foodsBody.innerHTML="";
+  foods.forEach(f=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${f.name}</td>
+      <td>${f.servingGrams}</td>
+      <td>${f.carbs}</td>
+      <td>${f.protein}</td>
+      <td><button class="btn btn-primary btn-sm" data-id="${f.id}">Add</button></td>
+    `;
+    foodsBody.appendChild(tr);
+  });
+}
+
+function renderMeal(){
+  mealBody.innerHTML="";
+  let tc=0,tp=0;
+
+  meal.forEach((f,i)=>{
+    const ratio=f.consumed/f.servingGrams;
+    const c=(f.carbs*ratio)||0;
+    const p=(f.protein*ratio)||0;
+    tc+=c; tp+=p;
+
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td data-label="Food">${f.name}</td>
+      <td data-label="Serving">${f.servingGrams}</td>
+      <td data-label="Consumed">
+        <input class="meal-grams" type="number" value="${f.consumed}" data-i="${i}">
+      </td>
+      <td data-label="Carbs">${c.toFixed(2)}</td>
+      <td data-label="Protein">${p.toFixed(2)}</td>
+      <td><button class="btn btn-danger btn-sm" data-r="${i}">Remove</button></td>
+    `;
+    mealBody.appendChild(tr);
+  });
+
+  totalCarbsEl.textContent=tc.toFixed(2);
+  totalProteinEl.textContent=tp.toFixed(2);
+}
+
+document.getElementById("addFoodBtn").onclick=()=>{
+  if(!foodName.value)return;
+  foods.push({
+    id:Date.now(),
+    name:foodName.value,
+    servingGrams:+servingGrams.value,
+    carbs:+carbs.value,
+    protein:+protein.value
+  });
+  saveFoods();
+  renderFoods();
+  foodName.value=servingGrams.value=carbs.value=protein.value="";
+};
+
+document.addEventListener("click",e=>{
+  if(e.target.dataset.id){
+    const f=foods.find(x=>x.id==e.target.dataset.id);
+    meal.push({...f,consumed:f.servingGrams});
+    renderMeal();
+  }
+  if(e.target.dataset.r){
+    meal.splice(e.target.dataset.r,1);
+    renderMeal();
+  }
+});
+
+document.addEventListener("input",e=>{
+  if(e.target.classList.contains("meal-grams")){
+    meal[e.target.dataset.i].consumed=+e.target.value;
+    renderMeal();
+  }
+});
+
+document.getElementById("clearMeal").onclick=()=>{
+  if(confirm("Clear meal?")){
+    meal=[];
+    renderMeal();
+  }
+};
+
+renderFoods();
 </script>
 
 </body>
