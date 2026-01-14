@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Food List & Meal Builder</title>
+<title>Meal Builder Mobile Optimized</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 
 <style>
@@ -74,7 +74,6 @@ th,td{padding:6px;border-bottom:1px solid #eee}
   Total Protein: <span id="totalProtein">0</span> g
 </div>
 <button id="clearMeal" style="margin-top:10px;">Clear Meal</button>
-</div>
 
 <script>
 const STORAGE_KEY="foods";
@@ -87,7 +86,7 @@ const mealBody=document.querySelector("#mealTable tbody");
 const totalCarbs=document.getElementById("totalCarbs");
 const totalProtein=document.getElementById("totalProtein");
 
-// Save to localStorage
+// Save foods
 function saveFoods(){localStorage.setItem(STORAGE_KEY,JSON.stringify(foods));}
 
 // Render Saved Foods
@@ -139,8 +138,8 @@ function renderMeal(){
     // Carbs | Protein row with remove button
     mealBody.insertAdjacentHTML("beforeend",`
       <tr>
-        <td>Carbs: ${c.toFixed(2)}</td>
-        <td>Protein: ${p.toFixed(2)}</td>
+        <td>Carbs: <span class="meal-carb" data-i="${i}">${c.toFixed(2)}</span></td>
+        <td>Protein: <span class="meal-protein" data-i="${i}">${p.toFixed(2)}</span></td>
         <td colspan="2"></td>
         <td><button class="btn-danger" data-r="${i}">Remove</button></td>
       </tr>
@@ -155,14 +154,33 @@ function renderMeal(){
 document.addEventListener("input",e=>{
   if(e.target.classList.contains("meal-grams")){
     const i=e.target.dataset.i;
-    const v=e.target.value.replace(/\D/g,"");
+    let v=e.target.value.replace(/\D/g,"");
     e.target.value=v;
     meal[i].consumed=Number(v)||0;
-    renderMeal();
+
+    // Only update carbs/protein spans, do NOT replace input
+    const ratio=(meal[i].consumed||0)/(meal[i].servingGrams||1);
+    const c=meal[i].carbs*ratio;
+    const p=meal[i].protein*ratio;
+    document.querySelector(`.meal-carb[data-i="${i}"]`).textContent=c.toFixed(2);
+    document.querySelector(`.meal-protein[data-i="${i}"]`).textContent=p.toFixed(2);
+
+    // Recompute totals
+    let tc=0,tp=0;
+    meal.forEach(m=>{const r=(m.consumed||0)/(m.servingGrams||1);tc+=m.carbs*r; tp+=m.protein*r});
+    totalCarbs.textContent=tc.toFixed(2);
+    totalProtein.textContent=tp.toFixed(2);
   }
 });
 
-// Button clicks
+// Auto-clear on focus
+document.addEventListener("focus",e=>{
+  if(e.target.classList.contains("meal-grams")){
+    e.target.value="";
+  }
+}, true);
+
+// Buttons
 document.addEventListener("click",e=>{
   if(e.target.dataset.add){
     const f=foods.find(x=>x.id==e.target.dataset.add);
@@ -218,6 +236,5 @@ document.getElementById("clearMeal").onclick=()=>{
 renderFoods();
 renderMeal();
 </script>
-
 </body>
 </html>
