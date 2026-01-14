@@ -52,65 +52,40 @@ input,button{
 
 input:focus{border-color:var(--accent)}
 
-.btn{
-  cursor:pointer;
-  font-weight:600;
-}
+.btn{cursor:pointer;font-weight:600}
 
 .btn-primary{
   background:linear-gradient(180deg,var(--accent),var(--accent-600));
-  color:#fff;
-  border:none;
+  color:#fff;border:none;
 }
 
-.btn-secondary{
-  background:#fff;
-}
-
+.btn-secondary{background:#fff}
 .btn-danger{
   background:linear-gradient(180deg,var(--danger),#b91c1c);
-  color:#fff;
-  border:none;
+  color:#fff;border:none;
 }
 
 .btn-sm{font-size:.85rem;padding:6px 8px}
 
-table{
-  width:100%;
-  border-collapse:collapse;
-}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px;border-bottom:1px solid #eee}
 
-th,td{
-  padding:8px;
-  border-bottom:1px solid #eee;
-}
-
-.meal-grams{
-  width:80px;
-  text-align:center;
-}
-
+.meal-grams{width:80px;text-align:center}
 .table-wrap{overflow-x:auto}
 
 /* =========================
    MOBILE MEAL BUILDER
    ========================= */
 @media(max-width:640px){
-
   body{margin:12px}
 
   #mealTable thead,
-  #mealTable tfoot{
-    display:none;
-  }
+  #mealTable tfoot{display:none}
 
   #mealTable,
   #mealTable tbody,
   #mealTable tr,
-  #mealTable td{
-    display:block;
-    width:100%;
-  }
+  #mealTable td{display:block;width:100%}
 
   #mealTable tr{
     background:#fff;
@@ -161,22 +136,13 @@ th,td{
 
 <!-- LEFT -->
 <div>
-
 <div class="box">
 <h2>Add Food</h2>
 <div class="flex">
-  <label class="column">Name
-    <input id="foodName">
-  </label>
-  <label class="column">Serving (g)
-    <input id="servingGrams" type="number">
-  </label>
-  <label class="column">Carbs (g)
-    <input id="carbs" type="number">
-  </label>
-  <label class="column">Protein (g)
-    <input id="protein" type="number">
-  </label>
+  <label class="column">Name<input id="foodName"></label>
+  <label class="column">Serving (g)<input id="servingGrams" type="number"></label>
+  <label class="column">Carbs (g)<input id="carbs" type="number"></label>
+  <label class="column">Protein (g)<input id="protein" type="number"></label>
   <button id="addFoodBtn" class="btn btn-primary">Add Food</button>
 </div>
 </div>
@@ -190,12 +156,10 @@ th,td{
 <tbody></tbody>
 </table>
 </div>
-
 </div>
 
 <!-- RIGHT -->
 <div>
-
 <div class="box">
 <h2>Meal Builder</h2>
 
@@ -211,8 +175,8 @@ th,td{
 <tr>
 <td><strong>Totals</strong></td>
 <td></td><td></td>
-<td id="totalCarbs">0</td>
-<td id="totalProtein">0</td>
+<td id="totalCarbsDesktop">0</td>
+<td id="totalProteinDesktop">0</td>
 <td></td>
 </tr>
 </tfoot>
@@ -220,12 +184,11 @@ th,td{
 </div>
 
 <div class="meal-totals-mobile">
-<div>Carbs: <span id="totalCarbs">0</span></div>
-<div>Protein: <span id="totalProtein">0</span></div>
+<div>Carbs: <span id="totalCarbsMobile">0</span></div>
+<div>Protein: <span id="totalProteinMobile">0</span></div>
 </div>
 
 <button id="clearMeal" class="btn btn-secondary">Clear Meal</button>
-
 </div>
 </div>
 </div>
@@ -241,8 +204,11 @@ const carbs=document.getElementById("carbs");
 const protein=document.getElementById("protein");
 const foodsBody=document.querySelector("#foodsTable tbody");
 const mealBody=document.querySelector("#mealTable tbody");
-const totalCarbsEl=document.getElementById("totalCarbs");
-const totalProteinEl=document.getElementById("totalProtein");
+
+const totalCarbsDesktop=document.getElementById("totalCarbsDesktop");
+const totalProteinDesktop=document.getElementById("totalProteinDesktop");
+const totalCarbsMobile=document.getElementById("totalCarbsMobile");
+const totalProteinMobile=document.getElementById("totalProteinMobile");
 
 function saveFoods(){
   localStorage.setItem(STORAGE_KEY,JSON.stringify(foods));
@@ -265,20 +231,25 @@ function renderFoods(){
 
 function renderMeal(){
   mealBody.innerHTML="";
-  let tc=0,tp=0;
+  let totalC=0, totalP=0;
 
   meal.forEach((f,i)=>{
-    const ratio=f.consumed/f.servingGrams;
-    const c=(f.carbs*ratio)||0;
-    const p=(f.protein*ratio)||0;
-    tc+=c; tp+=p;
+    const serving=Number(f.servingGrams)||1;
+    const consumed=Number(f.consumed)||0;
+    const ratio=consumed/serving;
+
+    const c=f.carbs*ratio;
+    const p=f.protein*ratio;
+
+    totalC+=c;
+    totalP+=p;
 
     const tr=document.createElement("tr");
     tr.innerHTML=`
       <td data-label="Food">${f.name}</td>
-      <td data-label="Serving">${f.servingGrams}</td>
+      <td data-label="Serving">${serving}</td>
       <td data-label="Consumed">
-        <input class="meal-grams" type="number" value="${f.consumed}" data-i="${i}">
+        <input class="meal-grams" type="number" min="0" value="${consumed}" data-i="${i}">
       </td>
       <td data-label="Carbs">${c.toFixed(2)}</td>
       <td data-label="Protein">${p.toFixed(2)}</td>
@@ -287,8 +258,10 @@ function renderMeal(){
     mealBody.appendChild(tr);
   });
 
-  totalCarbsEl.textContent=tc.toFixed(2);
-  totalProteinEl.textContent=tp.toFixed(2);
+  totalCarbsDesktop.textContent=totalC.toFixed(2);
+  totalProteinDesktop.textContent=totalP.toFixed(2);
+  totalCarbsMobile.textContent=totalC.toFixed(2);
+  totalProteinMobile.textContent=totalP.toFixed(2);
 }
 
 document.getElementById("addFoodBtn").onclick=()=>{
@@ -319,7 +292,7 @@ document.addEventListener("click",e=>{
 
 document.addEventListener("input",e=>{
   if(e.target.classList.contains("meal-grams")){
-    meal[e.target.dataset.i].consumed=+e.target.value;
+    meal[e.target.dataset.i].consumed=+e.target.value||0;
     renderMeal();
   }
 });
