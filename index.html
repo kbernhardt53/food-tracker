@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Meal Builder Mobile Optimized</title>
+<title>Meal Builder with Saved Meals</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 
 <style>
 body{font-family:Arial,sans-serif;margin:20px;background:#fff;color:#111}
 h1,h2{margin:0 0 12px}
-.box{border:1px solid #ddd;padding:12px;border-radius:10px;margin-bottom:20px}
+.box{border:1px solid #ddd;padding:12px;border-radius:10px;margin-bottom:20px;position:relative}
 .flex{display:flex;gap:10px;flex-wrap:wrap}
 .column{display:flex;flex-direction:column;gap:4px}
 input{padding:6px;border-radius:6px;border:1px solid #ccc;width:100%}
@@ -20,6 +20,7 @@ table{width:100%;border-collapse:collapse}
 th,td{padding:6px;border-bottom:1px solid #eee}
 .meal-grams{width:60px;text-align:center}
 .row{display:flex;gap:10px;align-items:center}
+.save-meal-btn{position:absolute;right:12px;bottom:12px;background:#16a34a;color:#fff}
 
 @media(max-width:640px){
   .row{flex-wrap:wrap}
@@ -74,22 +75,48 @@ th,td{padding:6px;border-bottom:1px solid #eee}
   Total Protein: <span id="totalProtein">0</span> g
 </div>
 <button id="clearMeal" style="margin-top:10px;">Clear Meal</button>
+<button id="saveMealBtn" class="save-meal-btn">Save Meal</button>
+</div>
+
+<div class="box">
+<h2>Saved Meals</h2>
+<div class="table-wrap">
+<table id="savedMealsTable">
+<thead>
+<tr>
+<th>Date</th>
+<th>Time</th>
+<th>Foods</th>
+<th>Total Carbs (g)</th>
+<th>Total Protein (g)</th>
+<th></th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
 
 <script>
 const STORAGE_KEY="foods";
+const MEALS_KEY="savedMeals";
+
 let foods=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
 let meal=[];
+let savedMeals=JSON.parse(localStorage.getItem(MEALS_KEY)||"[]");
 let searchQuery="";
 
 const foodsBody=document.querySelector("#foodsTable tbody");
 const mealBody=document.querySelector("#mealTable tbody");
 const totalCarbs=document.getElementById("totalCarbs");
 const totalProtein=document.getElementById("totalProtein");
+const savedMealsBody=document.querySelector("#savedMealsTable tbody");
 
-// Save foods
+// --- Helper Functions ---
 function saveFoods(){localStorage.setItem(STORAGE_KEY,JSON.stringify(foods));}
+function saveSavedMeals(){localStorage.setItem(MEALS_KEY,JSON.stringify(savedMeals));}
 
-// Render Saved Foods
+// --- Render Functions ---
 function renderFoods(){
   foodsBody.innerHTML="";
   foods.filter(f=>f.name.toLowerCase().includes(searchQuery))
@@ -109,7 +136,6 @@ function renderFoods(){
     });
 }
 
-// Render Meal
 function renderMeal(){
   mealBody.innerHTML="";
   let tc=0,tp=0;
@@ -121,9 +147,8 @@ function renderMeal(){
     tc+=c; tp+=p;
 
     // Food name row
-    mealBody.insertAdjacentHTML("beforeend",`
-      <tr><td colspan="5" style="font-weight:bold">${f.name}</td></tr>
-    `);
+    mealBody.insertAdjacentHTML("beforeend",`<tr><td colspan="5" style="font-weight:bold">${f.name}</td></tr>`);
+
     // Serving | Consumed row
     mealBody.insertAdjacentHTML("beforeend",`
       <tr>
@@ -135,7 +160,8 @@ function renderMeal(){
         <td colspan="2"></td>
       </tr>
     `);
-    // Carbs | Protein row with remove button
+
+    // Carbs | Protein row
     mealBody.insertAdjacentHTML("beforeend",`
       <tr>
         <td>Carbs: <span class="meal-carb" data-i="${i}">${c.toFixed(2)}</span></td>
@@ -150,7 +176,25 @@ function renderMeal(){
   totalProtein.textContent=tp.toFixed(2);
 }
 
-// Meal input
+function renderSavedMeals(){
+  savedMealsBody.innerHTML="";
+  savedMeals.forEach((m,i)=>{
+    const foodList=m.foods.map(f=>`${f.name}(${f.consumed}g)`).join(", ");
+    savedMealsBody.insertAdjacentHTML("beforeend",`
+      <tr>
+        <td>${m.date}</td>
+        <td>${m.time}</td>
+        <td>${foodList}</td>
+        <td>${m.totalCarbs.toFixed(2)}</td>
+        <td>${m.totalProtein.toFixed(2)}</td>
+        <td><button class="btn-danger" data-s="${i}">Delete</button></td>
+      </tr>
+    `);
+  });
+}
+
+// --- Event Listeners ---
+// Meal input update
 document.addEventListener("input",e=>{
   if(e.target.classList.contains("meal-grams")){
     const i=e.target.dataset.i;
@@ -158,14 +202,14 @@ document.addEventListener("input",e=>{
     e.target.value=v;
     meal[i].consumed=Number(v)||0;
 
-    // Only update carbs/protein spans, do NOT replace input
+    // Only update carbs/protein spans
     const ratio=(meal[i].consumed||0)/(meal[i].servingGrams||1);
     const c=meal[i].carbs*ratio;
     const p=meal[i].protein*ratio;
     document.querySelector(`.meal-carb[data-i="${i}"]`).textContent=c.toFixed(2);
     document.querySelector(`.meal-protein[data-i="${i}"]`).textContent=p.toFixed(2);
 
-    // Recompute totals
+    // Update totals
     let tc=0,tp=0;
     meal.forEach(m=>{const r=(m.consumed||0)/(m.servingGrams||1);tc+=m.carbs*r; tp+=m.protein*r});
     totalCarbs.textContent=tc.toFixed(2);
@@ -173,20 +217,21 @@ document.addEventListener("input",e=>{
   }
 });
 
-// Auto-clear on focus
+// Auto-clear consumed input on focus
 document.addEventListener("focus",e=>{
-  if(e.target.classList.contains("meal-grams")){
-    e.target.value="";
-  }
+  if(e.target.classList.contains("meal-grams")) e.target.value="";
 }, true);
 
-// Buttons
+// Button clicks
 document.addEventListener("click",e=>{
+  // Add food to meal
   if(e.target.dataset.add){
     const f=foods.find(x=>x.id==e.target.dataset.add);
     meal.push({...f,consumed:f.servingGrams});
     renderMeal();
   }
+
+  // Delete food
   if(e.target.dataset.del){
     if(confirm("Delete this food?")){
       const id=e.target.dataset.del;
@@ -197,19 +242,30 @@ document.addEventListener("click",e=>{
       renderMeal();
     }
   }
+
+  // Remove from meal
   if(e.target.dataset.r){
     meal.splice(e.target.dataset.r,1);
     renderMeal();
   }
+
+  // Delete saved meal
+  if(e.target.dataset.s){
+    if(confirm("Delete this saved meal?")){
+      savedMeals.splice(e.target.dataset.s,1);
+      saveSavedMeals();
+      renderSavedMeals();
+    }
+  }
 });
 
-// Search
+// Search foods
 document.getElementById("searchFood").oninput=e=>{
   searchQuery=e.target.value.toLowerCase();
   renderFoods();
 };
 
-// Add food
+// Add new food
 document.getElementById("addFoodBtn").onclick=()=>{
   const name=document.getElementById("foodName").value.trim();
   const s=+document.getElementById("servingGrams").value||0;
@@ -233,8 +289,27 @@ document.getElementById("clearMeal").onclick=()=>{
   }
 };
 
+// Save meal
+document.getElementById("saveMealBtn").onclick=()=>{
+  if(meal.length===0){alert("No foods in meal."); return;}
+  const now=new Date();
+  const date=now.toLocaleDateString();
+  const time=now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  let tc=0,tp=0;
+  meal.forEach(f=>{
+    const ratio=(f.consumed||0)/(f.servingGrams||1);
+    tc+=f.carbs*ratio; tp+=f.protein*ratio;
+  });
+  savedMeals.push({date,time,foods:JSON.parse(JSON.stringify(meal)),totalCarbs:tc,totalProtein:tp});
+  saveSavedMeals();
+  renderSavedMeals();
+  alert("Meal saved!");
+};
+
 renderFoods();
 renderMeal();
+renderSavedMeals();
 </script>
+
 </body>
 </html>
