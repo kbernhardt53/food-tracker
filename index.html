@@ -50,21 +50,10 @@ input,button{
   font-size:1rem;
 }
 
-input:focus{border-color:var(--accent)}
-
 .btn{cursor:pointer;font-weight:600}
-
-.btn-primary{
-  background:linear-gradient(180deg,var(--accent),var(--accent-600));
-  color:#fff;border:none;
-}
-
+.btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-600));color:#fff;border:none}
 .btn-secondary{background:#fff}
-.btn-danger{
-  background:linear-gradient(180deg,var(--danger),#b91c1c);
-  color:#fff;border:none;
-}
-
+.btn-danger{background:linear-gradient(180deg,var(--danger),#b91c1c);color:#fff;border:none}
 .btn-sm{font-size:.85rem;padding:6px 8px}
 
 table{width:100%;border-collapse:collapse}
@@ -72,15 +61,12 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
 .table-wrap{overflow-x:auto}
 
-/* Consumed input — mobile-safe numeric */
 .meal-grams{
   width:80px;
   text-align:center;
 }
 
-/* =========================
-   MOBILE MEAL BUILDER
-   ========================= */
+/* ===== MOBILE CARD LAYOUT ===== */
 @media(max-width:640px){
   body{margin:12px}
 
@@ -210,10 +196,6 @@ const STORAGE_KEY="foods";
 let foods=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
 let meal=[];
 
-const foodName=document.getElementById("foodName");
-const servingGrams=document.getElementById("servingGrams");
-const carbs=document.getElementById("carbs");
-const protein=document.getElementById("protein");
 const foodsBody=document.querySelector("#foodsTable tbody");
 const mealBody=document.querySelector("#mealTable tbody");
 
@@ -229,63 +211,68 @@ function saveFoods(){
 function renderFoods(){
   foodsBody.innerHTML="";
   foods.forEach(f=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${f.name}</td>
-      <td>${f.servingGrams}</td>
-      <td>${f.carbs}</td>
-      <td>${f.protein}</td>
-      <td><button class="btn btn-primary btn-sm" data-id="${f.id}">Add</button></td>
-    `;
-    foodsBody.appendChild(tr);
+    foodsBody.insertAdjacentHTML("beforeend",`
+      <tr>
+        <td>${f.name}</td>
+        <td>${f.servingGrams}</td>
+        <td>${f.carbs}</td>
+        <td>${f.protein}</td>
+        <td><button class="btn btn-primary btn-sm" data-id="${f.id}">Add</button></td>
+      </tr>
+    `);
   });
 }
 
 function renderMeal(){
   mealBody.innerHTML="";
-  let totalC=0, totalP=0;
-
   meal.forEach((f,i)=>{
-    const serving=Number(f.servingGrams)||1;
-    const consumed=Number(f.consumed)||0;
-    const ratio=consumed/serving;
+    mealBody.insertAdjacentHTML("beforeend",`
+      <tr>
+        <td data-label="Food">${f.name}</td>
+        <td data-label="Serving">${f.servingGrams}</td>
+        <td data-label="Consumed">
+          <input class="meal-grams"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            value="${f.consumed}"
+            data-i="${i}">
+        </td>
+        <td data-label="Carbs" class="carbs" data-i="${i}">0</td>
+        <td data-label="Protein" class="protein" data-i="${i}">0</td>
+        <td><button class="btn btn-danger btn-sm" data-r="${i}">Remove</button></td>
+      </tr>
+    `);
+  });
+  recalcTotals();
+}
 
+function recalcTotals(){
+  let tc=0,tp=0;
+  meal.forEach((f,i)=>{
+    const ratio=(f.consumed||0)/(f.servingGrams||1);
     const c=f.carbs*ratio;
     const p=f.protein*ratio;
+    tc+=c; tp+=p;
 
-    totalC+=c;
-    totalP+=p;
-
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td data-label="Food">${f.name}</td>
-      <td data-label="Serving">${serving}</td>
-      <td data-label="Consumed">
-        <input class="meal-grams"
-          type="text"
-          inputmode="numeric"
-          pattern="[0-9]*"
-          value="${consumed}"
-          data-i="${i}">
-      </td>
-      <td data-label="Carbs">${c.toFixed(2)}</td>
-      <td data-label="Protein">${p.toFixed(2)}</td>
-      <td><button class="btn btn-danger btn-sm" data-r="${i}">Remove</button></td>
-    `;
-    mealBody.appendChild(tr);
+    const cCell=document.querySelector(`.carbs[data-i="${i}"]`);
+    const pCell=document.querySelector(`.protein[data-i="${i}"]`);
+    if(cCell) cCell.textContent=c.toFixed(2);
+    if(pCell) pCell.textContent=p.toFixed(2);
   });
 
-  totalCarbsDesktop.textContent=totalC.toFixed(2);
-  totalProteinDesktop.textContent=totalP.toFixed(2);
-  totalCarbsMobile.textContent=totalC.toFixed(2);
-  totalProteinMobile.textContent=totalP.toFixed(2);
+  totalCarbsDesktop.textContent=tc.toFixed(2);
+  totalProteinDesktop.textContent=tp.toFixed(2);
+  totalCarbsMobile.textContent=tc.toFixed(2);
+  totalProteinMobile.textContent=tp.toFixed(2);
 }
 
 document.getElementById("addFoodBtn").onclick=()=>{
-  if(!foodName.value)return;
+  const name=foodName.value.trim();
+  if(!name)return;
   foods.push({
     id:Date.now(),
-    name:foodName.value,
+    name,
     servingGrams:+servingGrams.value,
     carbs:+carbs.value,
     protein:+protein.value
@@ -309,10 +296,11 @@ document.addEventListener("click",e=>{
 
 document.addEventListener("input",e=>{
   if(e.target.classList.contains("meal-grams")){
+    const i=e.target.dataset.i;
     const v=e.target.value.replace(/\D/g,"");
     e.target.value=v;
-    meal[e.target.dataset.i].consumed=Number(v)||0;
-    renderMeal();
+    meal[i].consumed=Number(v)||0;
+    recalcTotals();   // ✅ NO re-render → keyboard stays open
   }
 });
 
