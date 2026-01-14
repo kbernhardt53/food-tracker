@@ -70,8 +70,13 @@ input:focus{border-color:var(--accent)}
 table{width:100%;border-collapse:collapse}
 th,td{padding:8px;border-bottom:1px solid #eee}
 
-.meal-grams{width:80px;text-align:center}
 .table-wrap{overflow-x:auto}
+
+/* Consumed input — mobile-safe numeric */
+.meal-grams{
+  width:80px;
+  text-align:center;
+}
 
 /* =========================
    MOBILE MEAL BUILDER
@@ -112,6 +117,7 @@ th,td{padding:8px;border-bottom:1px solid #eee}
   .meal-grams{
     width:100%;
     padding:10px;
+    font-size:1rem;
   }
 
   .meal-totals-mobile{
@@ -151,7 +157,13 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 <h2>Saved Foods</h2>
 <table id="foodsTable">
 <thead>
-<tr><th>Name</th><th>Serving</th><th>Carbs</th><th>Protein</th><th></th></tr>
+<tr>
+  <th>Name</th>
+  <th>Serving (g)</th>
+  <th>Carbs (g)</th>
+  <th>Protein (g)</th>
+  <th></th>
+</tr>
 </thead>
 <tbody></tbody>
 </table>
@@ -184,8 +196,8 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 </div>
 
 <div class="meal-totals-mobile">
-<div>Carbs: <span id="totalCarbsMobile">0</span></div>
-<div>Protein: <span id="totalProteinMobile">0</span></div>
+<div>Carbs: <span id="totalCarbsMobile">0</span> g</div>
+<div>Protein: <span id="totalProteinMobile">0</span> g</div>
 </div>
 
 <button id="clearMeal" class="btn btn-secondary">Clear Meal</button>
@@ -249,7 +261,12 @@ function renderMeal(){
       <td data-label="Food">${f.name}</td>
       <td data-label="Serving">${serving}</td>
       <td data-label="Consumed">
-        <input class="meal-grams" type="number" min="0" value="${consumed}" data-i="${i}">
+        <input class="meal-grams"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          value="${consumed}"
+          data-i="${i}">
       </td>
       <td data-label="Carbs">${c.toFixed(2)}</td>
       <td data-label="Protein">${p.toFixed(2)}</td>
@@ -292,7 +309,9 @@ document.addEventListener("click",e=>{
 
 document.addEventListener("input",e=>{
   if(e.target.classList.contains("meal-grams")){
-    meal[e.target.dataset.i].consumed=+e.target.value||0;
+    const v=e.target.value.replace(/\D/g,"");
+    e.target.value=v;
+    meal[e.target.dataset.i].consumed=Number(v)||0;
     renderMeal();
   }
 });
