@@ -130,6 +130,7 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
 <!-- LEFT -->
 <div>
+
 <div class="box">
 <h2>Add Food</h2>
 <div class="flex">
@@ -138,24 +139,15 @@ th,td{padding:8px;border-bottom:1px solid #eee}
   </label>
 
   <label class="column">Serving (g)
-    <input id="servingGrams"
-      type="text"
-      inputmode="decimal"
-      pattern="[0-9]*">
+    <input id="servingGrams" type="text" inputmode="decimal" pattern="[0-9]*">
   </label>
 
   <label class="column">Carbs (g)
-    <input id="carbs"
-      type="text"
-      inputmode="decimal"
-      pattern="[0-9]*">
+    <input id="carbs" type="text" inputmode="decimal" pattern="[0-9]*">
   </label>
 
   <label class="column">Protein (g)
-    <input id="protein"
-      type="text"
-      inputmode="decimal"
-      pattern="[0-9]*">
+    <input id="protein" type="text" inputmode="decimal" pattern="[0-9]*">
   </label>
 
   <button id="addFoodBtn" class="btn btn-primary">Add Food</button>
@@ -164,6 +156,9 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
 <div class="box">
 <h2>Saved Foods</h2>
+
+<input id="searchFood" type="search" placeholder="Search foods..." style="margin-bottom:10px;width:100%">
+
 <table id="foodsTable">
 <thead>
 <tr>
@@ -177,10 +172,12 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 <tbody></tbody>
 </table>
 </div>
+
 </div>
 
 <!-- RIGHT -->
 <div>
+
 <div class="box">
 <h2>Meal Builder</h2>
 
@@ -211,6 +208,7 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
 <button id="clearMeal" class="btn btn-secondary">Clear Meal</button>
 </div>
+
 </div>
 </div>
 
@@ -218,6 +216,7 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 const STORAGE_KEY="foods";
 let foods=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
 let meal=[];
+let searchQuery="";
 
 const foodsBody=document.querySelector("#foodsTable tbody");
 const mealBody=document.querySelector("#mealTable tbody");
@@ -233,17 +232,19 @@ function saveFoods(){
 
 function renderFoods(){
   foodsBody.innerHTML="";
-  foods.forEach(f=>{
-    foodsBody.insertAdjacentHTML("beforeend",`
-      <tr>
-        <td>${f.name}</td>
-        <td>${f.servingGrams}</td>
-        <td>${f.carbs}</td>
-        <td>${f.protein}</td>
-        <td><button class="btn btn-primary btn-sm" data-id="${f.id}">Add</button></td>
-      </tr>
-    `);
-  });
+  foods
+    .filter(f=>f.name.toLowerCase().includes(searchQuery))
+    .forEach(f=>{
+      foodsBody.insertAdjacentHTML("beforeend",`
+        <tr>
+          <td>${f.name}</td>
+          <td>${f.servingGrams}</td>
+          <td>${f.carbs}</td>
+          <td>${f.protein}</td>
+          <td><button class="btn btn-primary btn-sm" data-id="${f.id}">Add</button></td>
+        </tr>
+      `);
+    });
 }
 
 function renderMeal(){
@@ -278,10 +279,8 @@ function recalcTotals(){
     const p=f.protein*ratio;
     tc+=c; tp+=p;
 
-    const cCell=document.querySelector(`.carbs[data-i="${i}"]`);
-    const pCell=document.querySelector(`.protein[data-i="${i}"]`);
-    if(cCell) cCell.textContent=c.toFixed(2);
-    if(pCell) pCell.textContent=p.toFixed(2);
+    document.querySelector(`.carbs[data-i="${i}"]`).textContent=c.toFixed(2);
+    document.querySelector(`.protein[data-i="${i}"]`).textContent=p.toFixed(2);
   });
 
   totalCarbsDesktop.textContent=tc.toFixed(2);
@@ -290,7 +289,7 @@ function recalcTotals(){
   totalProteinMobile.textContent=tp.toFixed(2);
 }
 
-document.getElementById("addFoodBtn").onclick=()=>{
+addFoodBtn.onclick=()=>{
   if(!foodName.value.trim())return;
   foods.push({
     id:Date.now(),
@@ -326,7 +325,12 @@ document.addEventListener("input",e=>{
   }
 });
 
-document.getElementById("clearMeal").onclick=()=>{
+searchFood.addEventListener("input",e=>{
+  searchQuery=e.target.value.toLowerCase();
+  renderFoods();
+});
+
+clearMeal.onclick=()=>{
   if(confirm("Clear meal?")){
     meal=[];
     renderMeal();
