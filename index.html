@@ -63,8 +63,11 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
 .table-wrap{overflow-x:auto}
 
+/* =========================
+   MEAL BUILDER INPUT SIZE
+   ========================= */
 .meal-grams{
-  width:80px;
+  width:60px;          /* ~1/4 previous width */
   text-align:center;
 }
 
@@ -77,8 +80,10 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
   #mealTable,
   #mealTable tbody,
-  #mealTable tr,
-  #mealTable td{display:block;width:100%}
+  #mealTable tr{
+    display:block;
+    width:100%;
+  }
 
   #mealTable tr{
     background:#fff;
@@ -91,21 +96,37 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
   #mealTable td{
     border:none;
-    padding:4px 0;
+    padding:0;
+    margin-bottom:6px;
   }
 
-  #mealTable td::before{
-    content:attr(data-label);
-    display:block;
+  /* Food name */
+  #mealTable td.food-name{
+    font-weight:700;
+    margin-bottom:8px;
+  }
+
+  /* Two-column rows */
+  .row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+
+  .row > div{
+    flex:1;
+  }
+
+  .row label{
     font-size:.75rem;
     color:var(--muted);
+    display:block;
     margin-bottom:2px;
   }
 
   .meal-grams{
-    width:100%;
-    padding:10px;
-    font-size:1rem;
+    width:60px;
+    padding:8px;
   }
 
   .meal-totals-mobile{
@@ -156,7 +177,6 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
 <div class="box">
 <h2>Saved Foods</h2>
-
 <input id="searchFood" type="search" placeholder="Search foods..." style="margin-bottom:10px;width:100%">
 
 <table id="foodsTable">
@@ -183,27 +203,13 @@ th,td{padding:8px;border-bottom:1px solid #eee}
 
 <div class="table-wrap">
 <table id="mealTable">
-<thead>
-<tr>
-<th>Food</th><th>Serving</th><th>Consumed</th><th>Carbs</th><th>Protein</th><th></th>
-</tr>
-</thead>
 <tbody></tbody>
-<tfoot>
-<tr>
-<td><strong>Totals</strong></td>
-<td></td><td></td>
-<td id="totalCarbsDesktop">0</td>
-<td id="totalProteinDesktop">0</td>
-<td></td>
-</tr>
-</tfoot>
 </table>
 </div>
 
 <div class="meal-totals-mobile">
-<div>Carbs: <span id="totalCarbsMobile">0</span> g</div>
-<div>Protein: <span id="totalProteinMobile">0</span> g</div>
+<div>Carbs: <span id="totalCarbs">0</span> g</div>
+<div>Protein: <span id="totalProtein">0</span> g</div>
 </div>
 
 <button id="clearMeal" class="btn btn-secondary">Clear Meal</button>
@@ -220,11 +226,8 @@ let searchQuery="";
 
 const foodsBody=document.querySelector("#foodsTable tbody");
 const mealBody=document.querySelector("#mealTable tbody");
-
-const totalCarbsDesktop=document.getElementById("totalCarbsDesktop");
-const totalProteinDesktop=document.getElementById("totalProteinDesktop");
-const totalCarbsMobile=document.getElementById("totalCarbsMobile");
-const totalProteinMobile=document.getElementById("totalProteinMobile");
+const totalCarbs=document.getElementById("totalCarbs");
+const totalProtein=document.getElementById("totalProtein");
 
 function saveFoods(){
   localStorage.setItem(STORAGE_KEY,JSON.stringify(foods));
@@ -232,8 +235,7 @@ function saveFoods(){
 
 function renderFoods(){
   foodsBody.innerHTML="";
-  foods
-    .filter(f=>f.name.toLowerCase().includes(searchQuery))
+  foods.filter(f=>f.name.toLowerCase().includes(searchQuery))
     .forEach(f=>{
       foodsBody.insertAdjacentHTML("beforeend",`
         <tr>
@@ -241,7 +243,7 @@ function renderFoods(){
           <td>${f.servingGrams}</td>
           <td>${f.carbs}</td>
           <td>${f.protein}</td>
-          <td style="white-space:nowrap">
+          <td>
             <button class="btn btn-primary btn-sm" data-add="${f.id}">Add</button>
             <button class="btn btn-danger btn-sm" data-del="${f.id}">Delete</button>
           </td>
@@ -252,59 +254,69 @@ function renderFoods(){
 
 function renderMeal(){
   mealBody.innerHTML="";
-  meal.forEach((f,i)=>{
-    mealBody.insertAdjacentHTML("beforeend",`
-      <tr>
-        <td data-label="Food">${f.name}</td>
-        <td data-label="Serving">${f.servingGrams}</td>
-        <td data-label="Consumed">
-          <input class="meal-grams"
-            type="text"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            value="${f.consumed}"
-            data-i="${i}">
-        </td>
-        <td data-label="Carbs" class="carbs" data-i="${i}">0</td>
-        <td data-label="Protein" class="protein" data-i="${i}">0</td>
-        <td><button class="btn btn-danger btn-sm" data-r="${i}">Remove</button></td>
-      </tr>
-    `);
-  });
-  recalcTotals();
-}
-
-function recalcTotals(){
   let tc=0,tp=0;
+
   meal.forEach((f,i)=>{
     const ratio=(f.consumed||0)/(f.servingGrams||1);
     const c=f.carbs*ratio;
     const p=f.protein*ratio;
     tc+=c; tp+=p;
 
-    document.querySelector(`.carbs[data-i="${i}"]`).textContent=c.toFixed(2);
-    document.querySelector(`.protein[data-i="${i}"]`).textContent=p.toFixed(2);
+    mealBody.insertAdjacentHTML("beforeend",`
+      <tr>
+        <td class="food-name">${f.name}</td>
+
+        <td>
+          <div class="row">
+            <div>
+              <label>Serving (g)</label>
+              ${f.servingGrams}
+            </div>
+            <div>
+              <label>Consumed (g)</label>
+              <input class="meal-grams"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                value="${f.consumed}"
+                data-i="${i}">
+            </div>
+          </div>
+        </td>
+
+        <td>
+          <div class="row">
+            <div>
+              <label>Carbs (g)</label>
+              ${c.toFixed(2)}
+            </div>
+            <div>
+              <label>Protein (g)</label>
+              ${p.toFixed(2)}
+            </div>
+          </div>
+        </td>
+
+        <td>
+          <button class="btn btn-danger btn-sm" data-r="${i}">Remove</button>
+        </td>
+      </tr>
+    `);
   });
 
-  totalCarbsDesktop.textContent=tc.toFixed(2);
-  totalProteinDesktop.textContent=tp.toFixed(2);
-  totalCarbsMobile.textContent=tc.toFixed(2);
-  totalProteinMobile.textContent=tp.toFixed(2);
+  totalCarbs.textContent=tc.toFixed(2);
+  totalProtein.textContent=tp.toFixed(2);
 }
 
-addFoodBtn.onclick=()=>{
-  if(!foodName.value.trim())return;
-  foods.push({
-    id:Date.now(),
-    name:foodName.value.trim(),
-    servingGrams:+servingGrams.value||0,
-    carbs:+carbs.value||0,
-    protein:+protein.value||0
-  });
-  saveFoods();
-  renderFoods();
-  foodName.value=servingGrams.value=carbs.value=protein.value="";
-};
+document.addEventListener("input",e=>{
+  if(e.target.classList.contains("meal-grams")){
+    const i=e.target.dataset.i;
+    const v=e.target.value.replace(/\D/g,"");
+    e.target.value=v;
+    meal[i].consumed=Number(v)||0;
+    renderMeal();
+  }
+});
 
 document.addEventListener("click",e=>{
   if(e.target.dataset.add){
@@ -328,20 +340,24 @@ document.addEventListener("click",e=>{
   }
 });
 
-document.addEventListener("input",e=>{
-  if(e.target.classList.contains("meal-grams")){
-    const i=e.target.dataset.i;
-    const v=e.target.value.replace(/\D/g,"");
-    e.target.value=v;
-    meal[i].consumed=Number(v)||0;
-    recalcTotals();
-  }
-});
-
-searchFood.addEventListener("input",e=>{
+searchFood.oninput=e=>{
   searchQuery=e.target.value.toLowerCase();
   renderFoods();
-});
+};
+
+addFoodBtn.onclick=()=>{
+  if(!foodName.value.trim())return;
+  foods.push({
+    id:Date.now(),
+    name:foodName.value.trim(),
+    servingGrams:+servingGrams.value||0,
+    carbs:+carbs.value||0,
+    protein:+protein.value||0
+  });
+  saveFoods();
+  renderFoods();
+  foodName.value=servingGrams.value=carbs.value=protein.value="";
+};
 
 clearMeal.onclick=()=>{
   if(confirm("Clear meal?")){
