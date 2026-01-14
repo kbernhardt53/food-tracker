@@ -241,7 +241,10 @@ function renderFoods(){
           <td>${f.servingGrams}</td>
           <td>${f.carbs}</td>
           <td>${f.protein}</td>
-          <td><button class="btn btn-primary btn-sm" data-id="${f.id}">Add</button></td>
+          <td style="white-space:nowrap">
+            <button class="btn btn-primary btn-sm" data-add="${f.id}">Add</button>
+            <button class="btn btn-danger btn-sm" data-del="${f.id}">Delete</button>
+          </td>
         </tr>
       `);
     });
@@ -304,10 +307,20 @@ addFoodBtn.onclick=()=>{
 };
 
 document.addEventListener("click",e=>{
-  if(e.target.dataset.id){
-    const f=foods.find(x=>x.id==e.target.dataset.id);
+  if(e.target.dataset.add){
+    const f=foods.find(x=>x.id==e.target.dataset.add);
     meal.push({...f,consumed:f.servingGrams});
     renderMeal();
+  }
+  if(e.target.dataset.del){
+    if(confirm("Delete this food?")){
+      const id=e.target.dataset.del;
+      foods=foods.filter(f=>f.id!=id);
+      meal=meal.filter(m=>m.id!=id);
+      saveFoods();
+      renderFoods();
+      renderMeal();
+    }
   }
   if(e.target.dataset.r){
     meal.splice(e.target.dataset.r,1);
