@@ -45,7 +45,13 @@ th,td{ border-bottom:1px solid #eee; padding:6px 8px; }
     <input id="searchFood" placeholder="Search foods">
     <table id="foodsTable">
       <thead>
-        <tr><th>Name</th><th>Serving</th><th>Carbs</th><th>Protein</th><th></th></tr>
+        <tr>
+          <th>Name</th>
+          <th>Serving</th>
+          <th>Carbs</th>
+          <th>Protein</th>
+          <th>Actions</th>
+        </tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -57,7 +63,14 @@ th,td{ border-bottom:1px solid #eee; padding:6px 8px; }
     <h2>Meal Builder</h2>
     <table id="mealTable">
       <thead>
-        <tr><th>Food</th><th>Serving</th><th>Consumed</th><th>Carbs</th><th>Protein</th><th></th></tr>
+        <tr>
+          <th>Food</th>
+          <th>Serving</th>
+          <th>Consumed</th>
+          <th>Carbs</th>
+          <th>Protein</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody></tbody>
       <tfoot>
@@ -81,7 +94,10 @@ th,td{ border-bottom:1px solid #eee; padding:6px 8px; }
     <button id="exportCsvBtn" class="btn btn-primary btn-sm">Export CSV</button>
     <table id="savedMealsTable">
       <thead>
-        <tr><th>Date</th><th>Time</th><th>Foods</th><th>Carbs</th><th>Protein</th><th></th></tr>
+        <tr>
+          <th>Date</th><th>Time</th><th>Foods</th>
+          <th>Carbs</th><th>Protein</th><th></th>
+        </tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -104,33 +120,43 @@ const nutrients=(s,c,p,g)=>{
 };
 
 function renderFoods(filter=''){
-  foodsTable.querySelector('tbody').innerHTML=
-    foods.filter(f=>f.name.toLowerCase().includes(filter.toLowerCase()))
-    .map(f=>`
-      <tr>
-        <td>${f.name}</td>
-        <td>${f.servingGrams}</td>
-        <td>${f.carbs}</td>
-        <td>${f.protein}</td>
-        <td>
-          <button class="btn btn-primary btn-sm add" data-id="${f.id}">Add</button>
-        </td>
-      </tr>`).join('');
+  foodsTable.querySelector('tbody').innerHTML =
+    foods
+      .filter(f=>f.name.toLowerCase().includes(filter.toLowerCase()))
+      .map(f=>`
+        <tr>
+          <td>${f.name}</td>
+          <td>${f.servingGrams}</td>
+          <td>${f.carbs}</td>
+          <td>${f.protein}</td>
+          <td>
+            <button class="btn btn-primary btn-sm add" data-id="${f.id}">Add</button>
+            <button class="btn btn-danger btn-sm del-food" data-id="${f.id}">Del</button>
+          </td>
+        </tr>
+      `).join('');
 }
 
 function renderMeal(){
-  mealTable.querySelector('tbody').innerHTML=
+  mealTable.querySelector('tbody').innerHTML =
     meal.map((f,i)=>{
       const n=nutrients(f.servingGrams,f.carbs,f.protein,f.consumedGrams);
       return `
         <tr>
           <td>${f.name}</td>
           <td>${f.servingGrams}</td>
-          <td><input class="meal-grams" data-i="${i}" type="number" inputmode="numeric" value="${f.consumedGrams}"></td>
+          <td>
+            <input class="meal-grams" data-i="${i}"
+                   type="number" inputmode="numeric"
+                   value="${f.consumedGrams}">
+          </td>
           <td>${n.carbs.toFixed(2)}</td>
           <td>${n.protein.toFixed(2)}</td>
-          <td><button class="btn btn-secondary btn-sm remove" data-i="${i}">X</button></td>
-        </tr>`;
+          <td>
+            <button class="btn btn-secondary btn-sm remove" data-i="${i}">X</button>
+          </td>
+        </tr>
+      `;
     }).join('');
   updateTotals();
 }
@@ -146,7 +172,7 @@ function updateTotals(){
 }
 
 function renderSavedMeals(){
-  savedMealsTable.querySelector('tbody').innerHTML=
+  savedMealsTable.querySelector('tbody').innerHTML =
     savedMeals.map((m,i)=>`
       <tr>
         <td>${m.date}</td>
@@ -154,15 +180,18 @@ function renderSavedMeals(){
         <td>${m.foods.map(f=>`${f.name}(${f.consumedGrams}g)`).join(', ')}</td>
         <td>${m.totalCarbs.toFixed(2)}</td>
         <td>${m.totalProtein.toFixed(2)}</td>
-        <td><button class="btn btn-danger btn-sm del-meal" data-i="${i}">Del</button></td>
-      </tr>`).join('');
+        <td>
+          <button class="btn btn-danger btn-sm del-meal" data-i="${i}">Del</button>
+        </td>
+      </tr>
+    `).join('');
 }
 
 addFoodBtn.onclick=()=>{
-  if(!foodName.value) return;
+  if(!foodName.value) return alert('Enter food name');
   foods.push({
     id:crypto.randomUUID(),
-    name:foodName.value,
+    name:foodName.value.trim(),
     servingGrams:+servingGrams.value,
     carbs:+carbs.value,
     protein:+protein.value
@@ -180,6 +209,13 @@ document.addEventListener('click',e=>{
     meal.push({...f,consumedGrams:f.servingGrams});
     renderMeal();
   }
+  if(e.target.classList.contains('del-food')){
+    if(confirm('Delete this food?')){
+      foods=foods.filter(f=>f.id!==e.target.dataset.id);
+      save(FOODS_KEY,foods);
+      renderFoods(searchFood.value);
+    }
+  }
   if(e.target.classList.contains('remove')){
     meal.splice(e.target.dataset.i,1);
     renderMeal();
@@ -194,7 +230,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{
   if(!e.target.classList.contains('meal-grams')) return;
   meal[e.target.dataset.i].consumedGrams=+e.target.value||0;
-  updateTotals(); // iOS-safe
+  updateTotals();
 });
 
 document.addEventListener('blur',e=>{
@@ -220,6 +256,7 @@ saveMealBtn.onclick=()=>{
 clearMeal.onclick=()=>{ meal=[]; renderMeal(); };
 
 exportCsvBtn.onclick=()=>{
+  if(!savedMeals.length) return alert('No saved meals');
   const rows=[
     ['Date','Time','Foods','Carbs','Protein'],
     ...savedMeals.map(m=>[
